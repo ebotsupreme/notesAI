@@ -5,9 +5,10 @@ import Image from "next/image";
 import { shadow } from "@/styles/utils";
 import { Button } from "./ui/button";
 import DarkModeToggle from "./DarkModeToggle";
+import LogoutButton from "./LogoutButton";
 
 function Header() {
-  const user = null; // Replace with actual user fetching logic
+  const user = 1; // Replace with actual user fetching logic
 
   return (
     <header
@@ -30,7 +31,7 @@ function Header() {
 
       <div className="flex gap-4">
         {user ? (
-          "Logout"
+          <LogoutButton />
         ) : (
           <>
             <Button asChild className="hidden sm:block">
