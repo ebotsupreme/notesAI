@@ -1,18 +1,17 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { shadow } from "@/styles/utils";
 import { Button } from "./ui/button";
 import DarkModeToggle from "./DarkModeToggle";
 import LogoutButton from "./LogoutButton";
+import { getUser } from "@/auth/server";
 
-function Header() {
-  const user = 1; // Replace with actual user fetching logic
+async function Header() {
+  const user = await getUser();
 
   return (
     <header
-      className="relative flex h-24 w-full items-center justify-between bg-popover px-3 sm:px-8"
+      className="bg-popover relative flex h-24 w-full items-center justify-between px-3 sm:px-8"
       style={{ boxShadow: shadow }}
     >
       <Link href="/" className="flex items-end gap-2">
@@ -24,7 +23,7 @@ function Header() {
           className="rounded-full"
           priority
         />
-        <h1 className="flex flex-col pb-1 text-2xl font-semibold leading-6">
+        <h1 className="flex flex-col pb-1 text-2xl leading-6 font-semibold">
           Notes <span>AI</span>
         </h1>
       </Link>

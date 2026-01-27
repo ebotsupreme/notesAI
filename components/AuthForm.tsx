@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import toast from "sonner";
+import { toast } from "sonner";
 import { CardContent, CardFooter } from "./ui/card";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -9,6 +9,7 @@ import { useTransition } from "react";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { loginAction, signUpAction } from "@/actions/users";
 
 type Props = {
   type: "login" | "signUp";
@@ -21,13 +22,36 @@ function AuthForm({ type }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (formData: FormData) => {
-    console.log("form submitted");
+    startTransition(async () => {
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+
+      let errorMessage;
+      let title;
+      let description;
+
+      if (isLoginForm) {
+        errorMessage = (await loginAction(email, password)).errorMessage;
+        title = "Logged in";
+        description = "You have been logged in successfully.";
+      } else {
+        errorMessage = (await signUpAction(email, password)).errorMessage;
+        title = "Signed up";
+        description = "Check youyr email for a confirmation link.";
+      }
+      if (!errorMessage) {
+        toast.success(title, { description });
+        router.replace("/");
+      } else {
+        toast.error("Error: " + errorMessage);
+      }
+    });
   };
 
   return (
     <form action={handleSubmit}>
       <CardContent className="grid w-full items-center">
-        <div className="flex flex-col space-y-1.5 mt-4">
+        <div className="mt-4 flex flex-col space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -38,7 +62,7 @@ function AuthForm({ type }: Props) {
             disabled={isPending}
           />
         </div>
-        <div className="flex flex-col space-y-1.5 mt-4">
+        <div className="mt-4 flex flex-col space-y-1.5">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
