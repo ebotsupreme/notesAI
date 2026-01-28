@@ -9,7 +9,6 @@ function SignUpPage() {
           <CardTitle className="text-center text-3xl">Sign Up</CardTitle>
           <AuthForm type="signUp" />
         </CardHeader>
-        {/* Add your sign up form here */}
       </Card>
     </div>
   );

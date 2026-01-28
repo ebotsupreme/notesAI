@@ -9,7 +9,6 @@ function LoginPage() {
           <CardTitle className="text-center text-3xl">Login</CardTitle>
           <AuthForm type="login" />
         </CardHeader>
-        {/* Add your login form here */}
       </Card>
     </div>
   );
