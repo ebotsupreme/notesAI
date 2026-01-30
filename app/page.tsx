@@ -1,5 +1,6 @@
 import { getUser } from "@/auth/server";
-import { Note } from "./generated/prisma/client";
+import AskAIButton from "@/components/AskAIButton";
+import prisma from "@/db/prisma";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -9,9 +10,16 @@ async function HomePage({ searchParams }: Props) {
   const noteIdParam = (await searchParams).noteId;
   const user = await getUser();
 
-  const notesId = Array.isArray(noteIdParam)
+  const noteId = Array.isArray(noteIdParam)
     ? noteIdParam![0]
     : noteIdParam || "";
+
+  const note = await prisma.note.findUnique({
+    where: {
+      id: noteId,
+      authorId: user?.id,
+    },
+  });
 
   return (
     <div className="flex h-full flex-col items-center gap-4">
