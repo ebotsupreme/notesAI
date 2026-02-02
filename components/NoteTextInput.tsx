@@ -4,6 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { Textarea } from "./ui/textarea";
 import { ChangeEvent, useEffect } from "react";
 import { DEBOUNCE_TIMEOUT } from "@/lib/constants";
+import useNote from "@/hooks/useNote";
+import { updateNoteAction } from "@/actions/notes";
 
 type Props = {
   noteId: string;
