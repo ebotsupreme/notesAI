@@ -3,6 +3,7 @@
 import { getUser } from "@/auth/server";
 import prisma from "@/db/prisma";
 import { handleError } from "@/lib/utils";
+import { revalidatePath } from "next/cache";
 
 export const createNoteAction = async (noteId: string) => {
   try {
@@ -17,6 +18,7 @@ export const createNoteAction = async (noteId: string) => {
       },
     });
 
+    revalidatePath("/", "layout");
     return { errorMessage: null };
   } catch (error) {
     return handleError(error);
@@ -31,10 +33,12 @@ export const updateNoteAction = async (noteId: string, text: string) => {
     await prisma.note.update({
       where: {
         id: noteId,
+        authorId: user.id,
       },
       data: { text },
     });
 
+    revalidatePath("/", "layout");
     return { errorMessage: null };
   } catch (error) {
     return handleError(error);
@@ -49,9 +53,11 @@ export const deleteNoteAction = async (noteId: string) => {
     await prisma.note.delete({
       where: {
         id: noteId,
+        authorId: user.id,
       },
     });
 
+    revalidatePath("/", "layout");
     return { errorMessage: null };
   } catch (error) {
     return handleError(error);

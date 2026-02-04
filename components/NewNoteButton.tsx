@@ -25,7 +25,7 @@ function NewNoteButton({ user }: Props) {
       const uuid = uuidv4();
       await createNoteAction(uuid);
 
-      router.push(`/?noteId=${uuid}`);
+      router.push(`/?noteId=${uuid}&toastType=newNote`);
 
       setLoading(false);
     }
