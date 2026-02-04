@@ -12,22 +12,25 @@ type Props = {
 function SelectNoteButton({ note }: Props) {
   const noteId = useSearchParams().get("noteId") || "";
   const { noteText: selectedNoteText } = useNote();
-  const [shouldUseGlobalNoteText, setShouldUseGlobalNoteText] = useState(false);
-  const [localNoteText, setLocalNoteText] = useState(note.text);
+  // const [shouldUseGlobalNoteText, setShouldUseGlobalNoteText] = useState(false);
+  // const [localNoteText, setLocalNoteText] = useState(note.text);
 
-  useEffect(() => {
-    if (noteId === note.id) {
-      setShouldUseGlobalNoteText(true);
-    } else {
-      setShouldUseGlobalNoteText(false);
-    }
-  }, [noteId, note.id]);
+  const shouldUseGlobalNoteText = noteId === note.id;
+  const localNoteText = shouldUseGlobalNoteText ? selectedNoteText : note.text;
 
-  useEffect(() => {
-    if (shouldUseGlobalNoteText) {
-      setLocalNoteText(selectedNoteText);
-    }
-  }, [selectedNoteText, shouldUseGlobalNoteText]);
+  // useEffect(() => {
+  //   if (noteId === note.id) {
+  //     setShouldUseGlobalNoteText(true);
+  //   } else {
+  //     setShouldUseGlobalNoteText(false);
+  //   }
+  // }, [noteId, note.id]);
+
+  // useEffect(() => {
+  //   if (shouldUseGlobalNoteText) {
+  //     setLocalNoteText(selectedNoteText);
+  //   }
+  // }, [selectedNoteText, shouldUseGlobalNoteText]);
 
   const blankNoteText = "Empty Note";
   let noteText = localNoteText || blankNoteText;
@@ -44,6 +47,9 @@ function SelectNoteButton({ note }: Props) {
       <Link href={`/?noteId=${note.id}`} className="flex h-fit flex-col">
         <p className="w-full truncate overflow-hidden text-ellipsis whitespace-nowrap">
           {noteText}
+        </p>
+        <p className="text-muted-foreground text-xs">
+          {note.updatedAt.toLocaleDateString()}
         </p>
       </Link>
     </SidebarMenuButton>
