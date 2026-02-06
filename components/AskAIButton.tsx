@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { Textarea } from "./ui/textarea";
 import { ArrowUpIcon } from "lucide-react";
 import "@/styles/ai-responses.css";
+import { askAIAboutNotesAction } from "@/actions/notes";
 
 type Props = {
   user: User | null;
@@ -59,16 +60,26 @@ function AskAIButton({ user }: Props) {
     textareaRef.current?.focus();
   };
 
-  const handleSubmit = () => {
-    console.log("submit");
-  };
-
   const scrollToBottom = () => {
     contentRef.current?.scrollTo({
       top: contentRef.current.scrollHeight,
       behavior: "smooth",
     });
   };
+
+  const handleSubmit = () => {
+    if (!questionText.trim()) return;
+
+    const newQuestions = [...questions, questionText]
+    setQuestions(newQuestions);
+    setQuestionText("");
+    setTimeout(scrollToBottom, 100); // slight delay so that the new question is rendered before we scroll
+
+    startTransition(async () => {
+        const response = await askAIAboutNotesAction(newQuestions, responses);
+        setResponses((prev) => [...prev, response]);
+        setTimeout(scrollToBottom, 100);
+    });
 
   // if user presses enter without shift, submit the question
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
