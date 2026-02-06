@@ -70,87 +70,90 @@ function AskAIButton({ user }: Props) {
   const handleSubmit = () => {
     if (!questionText.trim()) return;
 
-    const newQuestions = [...questions, questionText]
+    const newQuestions = [...questions, questionText];
     setQuestions(newQuestions);
     setQuestionText("");
     setTimeout(scrollToBottom, 100); // slight delay so that the new question is rendered before we scroll
 
     startTransition(async () => {
-        const response = await askAIAboutNotesAction(newQuestions, responses);
-        setResponses((prev) => [...prev, response]);
-        setTimeout(scrollToBottom, 100);
+      const response = await askAIAboutNotesAction(newQuestions, responses);
+      setResponses((prev) => [...prev, response]);
+      setTimeout(scrollToBottom, 100);
     });
 
-  // if user presses enter without shift, submit the question
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
+    // if user presses enter without shift, submit the question
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={handleOnOpenChange}>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant="secondary">Ask AI</Button>
-        </DialogTrigger>
-        <DialogContent
-          className="custom-scrollbar flex h-[85vh] max-w-4xl! flex-col overflow-y-auto"
-          ref={contentRef}
-        >
-          <DialogHeader>
-            <DialogTitle>Ask AI About Your Notes</DialogTitle>
-            <DialogDescription>
-              Our AI can answer questions about all of your notes
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="mt-4 flex flex-col gap-8">
-            {questions.map((question, index) => (
-              <Fragment key={index}>
-                <p className="bg-muted text-muted-foreground ml-auto max-w-[60%] rounded-md px-2 py-1 text-sm">
-                  {question}
-                </p>
-                {
-                  // AI responses will be formatted into html, so we need to use dangerouslySetInnerHTML
-                  responses[index] && (
-                    <p
-                      className="bot-response text-muted-foreground text-sm"
-                      dangerouslySetInnerHTML={{ __html: responses[index] }}
-                    />
-                  )
-                }
-              </Fragment>
-            ))}
-            {isPending && <p className="animate-pulse text-sm">Thinking...</p>}
-          </div>
-          <div
-            className="mt-auto flex cursor-text flex-col rounded-lg border p-4"
-            onClick={handleClickInput}
+    return (
+      <Dialog open={isOpen} onOpenChange={handleOnOpenChange}>
+        <form>
+          <DialogTrigger asChild>
+            <Button variant="secondary">Ask AI</Button>
+          </DialogTrigger>
+          <DialogContent
+            className="custom-scrollbar flex h-[85vh] max-w-4xl! flex-col overflow-y-auto"
+            ref={contentRef}
           >
-            <Textarea
-              ref={textareaRef}
-              placeholder="Ask me anything about your notes..."
-              className="placeholder:text-muted-foreground resize-none rounded-none border-none bg-transparent p-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              style={{
-                minHeight: "0",
-                lineHeight: "normal",
-              }}
-              rows={1}
-              onKeyDown={handleKeyDown}
-              onInput={handleInput}
-              value={questionText}
-              onChange={(e) => setQuestionText(e.target.value)}
-            />
-            <Button className="ml-auto size-8 rounded-full">
-              <ArrowUpIcon className="text-background" />
-            </Button>
-          </div>
-        </DialogContent>
-      </form>
-    </Dialog>
-  );
+            <DialogHeader>
+              <DialogTitle>Ask AI About Your Notes</DialogTitle>
+              <DialogDescription>
+                Our AI can answer questions about all of your notes
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-4 flex flex-col gap-8">
+              {questions.map((question, index) => (
+                <Fragment key={index}>
+                  <p className="bg-muted text-muted-foreground ml-auto max-w-[60%] rounded-md px-2 py-1 text-sm">
+                    {question}
+                  </p>
+                  {
+                    // AI responses will be formatted into html, so we need to use dangerouslySetInnerHTML
+                    responses[index] && (
+                      <p
+                        className="bot-response text-muted-foreground text-sm"
+                        dangerouslySetInnerHTML={{ __html: responses[index] }}
+                      />
+                    )
+                  }
+                </Fragment>
+              ))}
+              {isPending && (
+                <p className="animate-pulse text-sm">Thinking...</p>
+              )}
+            </div>
+            <div
+              className="mt-auto flex cursor-text flex-col rounded-lg border p-4"
+              onClick={handleClickInput}
+            >
+              <Textarea
+                ref={textareaRef}
+                placeholder="Ask me anything about your notes..."
+                className="placeholder:text-muted-foreground resize-none rounded-none border-none bg-transparent p-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                style={{
+                  minHeight: "0",
+                  lineHeight: "normal",
+                }}
+                rows={1}
+                onKeyDown={handleKeyDown}
+                onInput={handleInput}
+                value={questionText}
+                onChange={(e) => setQuestionText(e.target.value)}
+              />
+              <Button className="ml-auto size-8 rounded-full">
+                <ArrowUpIcon className="text-background" />
+              </Button>
+            </div>
+          </DialogContent>
+        </form>
+      </Dialog>
+    );
+  };
 }
 
 export default AskAIButton;

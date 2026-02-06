@@ -2,7 +2,9 @@
 
 import { getUser } from "@/auth/server";
 import prisma from "@/db/prisma";
+import ai from "@/gemini";
 import { handleError } from "@/lib/utils";
+import { Content } from "@google/genai";
 import { revalidatePath } from "next/cache";
 
 export const createNoteAction = async (noteId: string) => {
@@ -68,36 +70,34 @@ export const askAIAboutNotesAction = async (
   newQuestions: string[],
   responses: string[],
 ) => {
-  try {
-    const user = await getUser();
-    if (!user) throw new Error("You must be logged in to ask AI questions.");
+  const user = await getUser();
+  if (!user) throw new Error("You must be logged in to ask AI questions.");
 
-    const notes = await prisma.note.findMany({
-      where: {
-        authorId: user.id,
-      },
-      orderBy: { createdAt: "desc" },
-      select: { text: true, createdAt: true, updatedAt: true },
-    });
+  const notes = await prisma.note.findMany({
+    where: {
+      authorId: user.id,
+    },
+    orderBy: { createdAt: "desc" },
+    select: { text: true, createdAt: true, updatedAt: true },
+  });
 
-    if (notes.length === 0) {
-      return "You don't have any notes yet.";
-    }
+  if (notes.length === 0) {
+    return "You don't have any notes yet.";
+  }
 
-    const formattedNotes = notes
-      .map((note) =>
-        `
+  const limitedNotes = notes.slice(0, 100); // limit to 100 most recent notes
+
+  const formattedNotes = limitedNotes
+    .map((note) =>
+      `
       Text: ${note.text}
       Created at: ${note.createdAt}
       Last updated: ${note.updatedAt}
       `.trim(),
-      )
-      .join("\n");
+    )
+    .join("\n");
 
-    const messages: ChatCompletionMessageParam[] = [
-      {
-        role: "developer",
-        content: `
+  const systemPrompt = `
           You are a helpful assistant that answers questions about a user's notes. 
           Assume all questions are related to the user's notes. 
           Make sure that your answers are not too verbose and you speak succinctly. 
@@ -111,12 +111,34 @@ export const askAIAboutNotesAction = async (
     
           Here are the user's notes:
           ${formattedNotes}
-          `,
-      },
-    ];
+          `.trim();
 
-    return { errorMessage: null };
-  } catch (error) {
-    return handleError(error);
+  const messages: Content[] = [];
+
+  for (let i = 0; i < newQuestions.length; i++) {
+    messages.push({ role: "user", parts: [{ text: newQuestions[i] }] });
+
+    if (responses[i]) {
+      messages.push({ role: "model", parts: [{ text: responses[i] }] });
+    }
   }
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    config: {
+      systemInstruction: {
+        parts: [
+          {
+            text: systemPrompt,
+          },
+        ],
+      },
+      temperature: 0.3, // Keep it focused on the notes
+    },
+    contents: messages,
+  });
+
+  return (
+    response.text ?? "A problem occurred while generating the AI response."
+  );
 };
