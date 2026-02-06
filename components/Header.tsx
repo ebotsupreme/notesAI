@@ -18,7 +18,7 @@ async function Header() {
       <SidebarTrigger className="absolute top-1 left-1" />
       <Link href="/" className="flex items-end gap-2">
         <Image
-          src="/notesAiLogo.png"
+          src="/notesAILogo.png"
           alt="Logo"
           width={60}
           height={60}
